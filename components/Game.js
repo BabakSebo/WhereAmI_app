@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { TextInput, Text, View, StyleSheet, Pressable, Modal, Button} from "react-native"
 import { locationDayOne } from "../data/ImageData";
+import ImageViewer from "./ImageViewer";
 
 export default function Game() {
     const [input, setInput] = useState(""); // Declare a state variable to store user input
@@ -11,14 +12,18 @@ export default function Game() {
     const handlePress = () => {
       const location = Object.values(locationDayOne)[photoIndex]
       if (input.toLowerCase() === location.answer) { // Check if user's input is correct
+        setPhotoIndex(photoIndex + 1) // Reveal new photo
         setShowModal(true); // Set the showModal state to true to reveal the modal
         setNumAttempts(0); // Reset the number of attempts
+        setInput(""); // Reset the input bar to an empty string
       } else {
         if (numAttempts < 4) { // Check if the number of attempts is less than 4
           setNumAttempts(numAttempts + 1); // Increment the number of attempts
         } else {
           setShowModal(true); // Set the showModal state to true to reveal the modal
           setNumAttempts(0); // Reset the number of attempts
+          setInput(""); // Reset the input bar to an empty string
+          setPhotoIndex(photoIndex + 1) // reveal the new photo
         }
       }
     };
@@ -40,9 +45,10 @@ export default function Game() {
           return "";
       }
     };
-  
+
     return (
       <View> 
+        <ImageViewer photoIndex={photoIndex} />
         <TextInput
           style={styles.input}
           onChangeText={(text) => setInput(text)} // Update the input state when the user types
@@ -68,6 +74,7 @@ export default function Game() {
   
   const styles = StyleSheet.create({
     input: {
+      alignSelf:'center',
       textAlign: 'center',
       height: 50,
       width: 200,
