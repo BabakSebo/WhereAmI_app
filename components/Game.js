@@ -10,12 +10,14 @@ export default function Game() {
     const [photoIndex, setPhotoIndex] = useState(0) // Declare a state variable to change photos
   
     const handlePress = () => {
-      const location = Object.values(locationDayOne)[photoIndex]
-      if (input.toLowerCase() === location.answer) { // Check if user's input is correct
-        setPhotoIndex(photoIndex + 1) // Reveal new photo
+      const nextPhotoIndex = photoIndex + 1;
+      const location = Object.values(locationDayOne)[photoIndex];
+      
+      if (input.trim().toLowerCase() === location.answer) { // Check if user's input is correct
         setShowModal(true); // Set the showModal state to true to reveal the modal
         setNumAttempts(0); // Reset the number of attempts
         setInput(""); // Reset the input bar to an empty string
+        setPhotoIndex(nextPhotoIndex) // reveal the new photo
       } else {
         if (numAttempts < 4) { // Check if the number of attempts is less than 4
           setNumAttempts(numAttempts + 1); // Increment the number of attempts
@@ -23,7 +25,7 @@ export default function Game() {
           setShowModal(true); // Set the showModal state to true to reveal the modal
           setNumAttempts(0); // Reset the number of attempts
           setInput(""); // Reset the input bar to an empty string
-          setPhotoIndex(photoIndex + 1) // reveal the new photo
+          setPhotoIndex(nextPhotoIndex) // reveal the new photo
         }
       }
     };
@@ -60,8 +62,10 @@ export default function Game() {
         <Text style={styles.attemptsText}>{getTally(numAttempts)}</Text> 
         <Modal visible={showModal}>
           <View style={styles.modal}>
-            {input.toLowerCase() === Object.values(locationDayOne)[photoIndex].answer ? (
-              <Text style={styles.modalText}>Bingo</Text>
+          {console.log('bye', Object.values(locationDayOne)[photoIndex].answer )}
+          {console.log('hello', input)}
+            {input.trim().toLowerCase() === Object.values(locationDayOne)[photoIndex].answer.trim() ? (
+              <Text style={styles.modalText}>Bingo </Text>
             ) : (
               <Text style={styles.modalText}>No Bueno</Text>
             )}
@@ -100,7 +104,8 @@ export default function Game() {
     modal: {
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      alignSelf: 'center'
     },
     modalText: {
       fontSize: 20,
@@ -114,4 +119,5 @@ export default function Game() {
   text: {
     fontFamily: 'monospace'
   }
+
   });
