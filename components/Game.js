@@ -7,25 +7,32 @@ export default function Game() {
     const [input, setInput] = useState(""); // Declare a state variable to store user input
     const [showModal, setShowModal] = useState(false); // Declare a state variable to control modal visibility
     const [numAttempts, setNumAttempts] = useState(0); // Declare a state variable to keep track of the number of attempts
-    const [photoIndex, setPhotoIndex] = useState(0) // Declare a state variable to change photos
+    const [photoIndex, setPhotoIndex] = useState(0); // Declare a state variable to change photos
+    const [currentInput, setCurrentInput] = useState("");
+    const [endRoundModal, setEndRoundModal] = useState(false);
   
     const handlePress = () => {
-      const nextPhotoIndex = photoIndex + 1;
       const location = Object.values(locationDayOne)[photoIndex];
       
       if (input.trim().toLowerCase() === location.answer) { // Check if user's input is correct
+        setCurrentInput(input.trim().toLowerCase())
         setShowModal(true); // Set the showModal state to true to reveal the modal
         setNumAttempts(0); // Reset the number of attempts
         setInput(""); // Reset the input bar to an empty string
-        setPhotoIndex(nextPhotoIndex) // reveal the new photo
+        if(photoIndex === 4) {
+          setEndRoundModal(true)
+        }
       } else {
         if (numAttempts < 4) { // Check if the number of attempts is less than 4
           setNumAttempts(numAttempts + 1); // Increment the number of attempts
         } else {
+          setCurrentInput(input.trim().toLowerCase())
           setShowModal(true); // Set the showModal state to true to reveal the modal
           setNumAttempts(0); // Reset the number of attempts
           setInput(""); // Reset the input bar to an empty string
-          setPhotoIndex(nextPhotoIndex) // reveal the new photo
+          if(photoIndex === 4) {
+            setEndRoundModal(true)
+          }
         }
       }
     };
@@ -62,15 +69,18 @@ export default function Game() {
         <Text style={styles.attemptsText}>{getTally(numAttempts)}</Text> 
         <Modal visible={showModal}>
           <View style={styles.modal}>
-          {console.log('bye', Object.values(locationDayOne)[photoIndex].answer )}
-          {console.log('hello', input)}
-            {input.trim().toLowerCase() === Object.values(locationDayOne)[photoIndex].answer.trim() ? (
-              <Text style={styles.modalText}>Bingo </Text>
+            {currentInput === Object.values(locationDayOne)[photoIndex].answer.trim() ? (
+              <Text style={styles.modalText}>Bingo</Text>
             ) : (
               <Text style={styles.modalText}>No Bueno</Text>
             )}
-            <Button title="OK" onPress={() => setShowModal(false)} />
+            <Button title="OK" onPress={() => {setShowModal(false);  setPhotoIndex(photoIndex + 1) }} />
           </View>
+        </Modal>
+        <Modal visible={endRoundModal}>
+              <View style={styles.modal}>
+                <Text style={styles.modalText}>Finito</Text>
+              </View>
         </Modal>
       </View>
     );
