@@ -10,14 +10,19 @@ export default function Game() {
     const [photoIndex, setPhotoIndex] = useState(0); // Declare a state variable to change photos
     const [currentInput, setCurrentInput] = useState("");
     const [endRoundModal, setEndRoundModal] = useState(false);
+    const [scoreboardVisible, setScoreboardVisible] = useState(false); // Declare a state variable for the scoreboard modal
+    const [roundScore, setRoundScore] = useState(0); // Declare a state variable for the score per round
   
     const handlePress = () => {
       const location = Object.values(locationDayOne)[photoIndex];
+
+   
       
       if (input.trim().toLowerCase() === location.answer) { // Check if user's input is correct
         setCurrentInput(input.trim().toLowerCase())
         setShowModal(true); // Set the showModal state to true to reveal the modal
         setNumAttempts(0); // Reset the number of attempts
+        setRoundScore(roundScore + 1) // increase the score when the answer is correct
         setInput(""); // Reset the input bar to an empty string
         if(photoIndex === 4) {
           setEndRoundModal(true)
@@ -67,6 +72,9 @@ export default function Game() {
           <Text style={styles.text}>Submit</Text>    
         </Pressable> 
         <Text style={styles.attemptsText}>{getTally(numAttempts)}</Text> 
+        <Pressable style={styles.buttonScore} onPress={()=> setScoreboardVisible(true)}>
+        <Text style={styles.text}>Score</Text>  
+        </Pressable>
         <Modal visible={showModal}>
           <View style={styles.modal}>
             {currentInput === Object.values(locationDayOne)[photoIndex].answer.trim() ? (
@@ -77,9 +85,18 @@ export default function Game() {
             <Button title="OK" onPress={() => {setShowModal(false);  setPhotoIndex(photoIndex + 1) }} />
           </View>
         </Modal>
+        <Modal visible={scoreboardVisible}>
+        <View style={styles.modal}>
+          <Text style={styles.modalText}>Round 1 Score: {roundScore}</Text>
+          <Button
+            title="Close"
+            onPress={() => setScoreboardVisible(false)}
+          />
+        </View>
+      </Modal>
         <Modal visible={endRoundModal}>
               <View style={styles.modal}>
-                <Text style={styles.modalText}>Finito</Text>
+                <Text style={styles.modalText}>Round 1 Completed, you got {roundScore}/5</Text>
               </View>
         </Modal>
       </View>
@@ -111,6 +128,16 @@ export default function Game() {
       marginRight: 40,
       marginTop: 5
     },
+    buttonScore: {
+      alignItems: 'center',
+      backgroundColor: 'darkseagreen',
+      borderRadius: 4,
+      height: 40,
+      padding: 10,
+      marginLeft: 40,
+      marginRight: 40,
+      marginTop: 5
+    },
     modal: {
       flex: 1,
       alignItems: 'center',
@@ -119,7 +146,8 @@ export default function Game() {
     },
     modalText: {
       fontSize: 20,
-      marginBottom: 20
+      marginBottom: 20,
+      fontFamily: 'monospace',
     },
     attemptsText: {
     textAlign: 'center',
