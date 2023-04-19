@@ -87,7 +87,7 @@ export default function Game() {
         </Modal>
         <Modal visible={scoreboardVisible}>
         <View style={styles.modal}>
-          <Text style={styles.modalText}>Round 1 Score: {roundScore}</Text>
+          <Text style={styles.modalText}>Round {photoIndex+1} Score: {roundScore}</Text>
           <Button
             title="Close"
             onPress={() => setScoreboardVisible(false)}
