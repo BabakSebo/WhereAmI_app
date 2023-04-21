@@ -12,10 +12,24 @@ export default function Game() {
     const [endRoundModal, setEndRoundModal] = useState(false);
     const [scoreboardVisible, setScoreboardVisible] = useState(false); // Declare a state variable for the scoreboard modal
     const [roundScore, setRoundScore] = useState(0); // Declare a state variable for the score per round
+    const [totalScore, setTotalScore] = useState(0);
     const [currentRound, setCurrentRound] = useState(1); // Declare a state varable to store the current round 
 
     const getCurrentRoundData = () => {
       return roundsData[currentRound] || {}; // return the data for the current round or an empty object if the round data is not available
+    }
+
+    const resetGame = () => {
+      setInput("");
+      setShowModal(false);
+      setNumAttempts(0);
+      setPhotoIndex(0);
+      setCurrentInput("");
+      setEndRoundModal(false);
+      setScoreboardVisible(false);
+      setRoundScore(0);
+      setTotalScore(0);
+      setCurrentRound(1);
     }
 
     const currentRoundData = getCurrentRoundData();
@@ -28,7 +42,8 @@ export default function Game() {
         setCurrentInput(input.trim().toLowerCase())
         setShowModal(true); // Set the showModal state to true to reveal the modal
         setNumAttempts(0); // Reset the number of attempts
-        setRoundScore(roundScore + 1) // increase the score when the answer is correct
+        setRoundScore(roundScore + 1) // increase the score for the round when the answer is correct
+        setTotalScore(totalScore + 1) // increase the total score when the answer is correct
         setInput(""); // Reset the input bar to an empty string
         if(photoIndex === 4) {
           setEndRoundModal(true)
@@ -43,7 +58,6 @@ export default function Game() {
           setInput(""); // Reset the input bar to an empty string
           if(photoIndex === 4) {
             setEndRoundModal(true)
-            setCurrentRound(currentRound + 1)
           }
         }
       }
@@ -94,7 +108,8 @@ export default function Game() {
         </Modal>
         <Modal visible={scoreboardVisible}>
         <View style={styles.modal}>
-          <Text style={styles.modalText}>Round 1 Score: {roundScore}</Text>
+          <Text style={styles.modalText}>Round {currentRound} Score: {roundScore}</Text>
+          <Text style={styles.modalText}>Total Score: {totalScore}</Text>
           <Button
             title="Close"
             onPress={() => setScoreboardVisible(false)}
@@ -104,8 +119,12 @@ export default function Game() {
         <Modal visible={endRoundModal}>
               <View style={styles.modal}>
                 <Text style={styles.modalText}>Round 1 Completed, you got {roundScore}/5</Text>
+                <Button title="NEXT ROUND" onPress={() => {setEndRoundModal(false);   setShowModal(false), setCurrentRound(currentRound + 1); setPhotoIndex(0); setRoundScore(0) }} />
               </View>
         </Modal>
+        <Pressable style={styles.buttonRestart} onPress={resetGame}>
+         <Text style={styles.text}>R</Text>
+        </Pressable>
       </View>
     );
   }
@@ -163,6 +182,15 @@ export default function Game() {
   },
   text: {
     fontFamily: 'monospace'
-  }
+  },
+  buttonRestart: {
+
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+
+    width:30
+  },
 
   });
