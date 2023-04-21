@@ -1,9 +1,9 @@
 import { Image } from "react-native"
 import { StyleSheet } from "react-native"
-import { locationDayOne } from "../data/ImageData"  
 
-export default function ImageViewer({photoIndex}){
-    const location = Object.values(locationDayOne)[photoIndex];
+
+export default function ImageViewer({photoIndex, currentRoundData}){
+    const location = Object.values(currentRoundData)[photoIndex];
 
 
       return (

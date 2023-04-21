@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { TextInput, Text, View, StyleSheet, Pressable, Modal, Button} from "react-native"
-import { locationDayOne } from "../data/ImageData";
+import { roundsData } from "../data/ImageData";
 import ImageViewer from "./ImageViewer";
 
 export default function Game() {
@@ -12,10 +12,16 @@ export default function Game() {
     const [endRoundModal, setEndRoundModal] = useState(false);
     const [scoreboardVisible, setScoreboardVisible] = useState(false); // Declare a state variable for the scoreboard modal
     const [roundScore, setRoundScore] = useState(0); // Declare a state variable for the score per round
+    const [currentRound, setCurrentRound] = useState(1); // Declare a state varable to store the current round 
+
+    const getCurrentRoundData = () => {
+      return roundsData[currentRound] || {}; // return the data for the current round or an empty object if the round data is not available
+    }
+
+    const currentRoundData = getCurrentRoundData();
   
     const handlePress = () => {
-      const location = Object.values(locationDayOne)[photoIndex];
-
+      const location = Object.values(currentRoundData)[photoIndex];
    
       
       if (input.trim().toLowerCase() === location.answer) { // Check if user's input is correct
@@ -37,6 +43,7 @@ export default function Game() {
           setInput(""); // Reset the input bar to an empty string
           if(photoIndex === 4) {
             setEndRoundModal(true)
+            setCurrentRound(currentRound + 1)
           }
         }
       }
@@ -62,7 +69,7 @@ export default function Game() {
 
     return (
       <View> 
-        <ImageViewer photoIndex={photoIndex} />
+        <ImageViewer photoIndex={photoIndex} currentRoundData={currentRoundData} />
         <TextInput
           style={styles.input}
           onChangeText={(text) => setInput(text)} // Update the input state when the user types
@@ -77,7 +84,7 @@ export default function Game() {
         </Pressable>
         <Modal visible={showModal}>
           <View style={styles.modal}>
-            {currentInput === Object.values(locationDayOne)[photoIndex].answer.trim() ? (
+            {currentInput === Object.values(currentRoundData)[photoIndex].answer.trim() ? (
               <Text style={styles.modalText}>Bingo</Text>
             ) : (
               <Text style={styles.modalText}>No Bueno</Text>
@@ -87,7 +94,7 @@ export default function Game() {
         </Modal>
         <Modal visible={scoreboardVisible}>
         <View style={styles.modal}>
-          <Text style={styles.modalText}>Round {photoIndex+1} Score: {roundScore}</Text>
+          <Text style={styles.modalText}>Round 1 Score: {roundScore}</Text>
           <Button
             title="Close"
             onPress={() => setScoreboardVisible(false)}
