@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { TextInput, Text, View, StyleSheet, Pressable, Modal, Button} from "react-native"
 import { roundsData } from "../data/ImageData";
 import ImageViewer from "./ImageViewer";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Game() {
     const [input, setInput] = useState(""); // Declare a state variable to store user input
@@ -13,7 +14,9 @@ export default function Game() {
     const [scoreboardVisible, setScoreboardVisible] = useState(false); // Declare a state variable for the scoreboard modal
     const [roundScore, setRoundScore] = useState(0); // Declare a state variable for the score per round
     const [totalScore, setTotalScore] = useState(0);
-    const [currentRound, setCurrentRound] = useState(1); // Declare a state varable to store the current round 
+    const [currentRound, setCurrentRound] = useState(1); // Declare a state variable to store the current round 
+    const [timer, setTimer] = useState(null); // Declare a state variable to store the timer ID
+    const [timeRemaining, setTimeRemaining] = useState(null); // Declare a state variable to store time remaining when going between rounds
 
     const getCurrentRoundData = () => {
       return roundsData[currentRound] || {}; // return the data for the current round or an empty object if the round data is not available
@@ -30,9 +33,68 @@ export default function Game() {
       setRoundScore(0);
       setTotalScore(0);
       setCurrentRound(1);
+      setTimer(null);
+      setTimeRemaining(null);
     }
 
     const currentRoundData = getCurrentRoundData();
+
+    const nextRound = async () => {
+      setEndRoundModal(false);
+      setShowModal(false);
+      setRoundScore(0);
+      setPhotoIndex(0);
+      setCurrentRound(currentRound + 1);
+    
+      // Calculate the end time
+      const endTime = new Date().getTime() + 3 * 60 * 60 * 1000;
+    
+      // Save the end time in AsyncStorage
+      await AsyncStorage.setItem('timerEndTime', endTime.toString());
+    };
+
+    useEffect(() => {
+      const checkTimer = async () => {
+        const endTimeString = await AsyncStorage.getItem('timerEndTime');
+        if (endTimeString) {
+          const endTime = parseInt(endTimeString, 10);
+          const currentTime = new Date().getTime();
+    
+          if (currentTime >= endTime) {
+            // Timer has already ended, start the next round
+            setCurrentRound(currentRound + 1);
+          } else {
+            // Timer is still running, start a new timer
+            const updateRemainingTime = () => {
+              const currentTime = new Date().getTime();
+              setTimeRemaining(Math.max(0, endTime - currentTime));
+            };
+    
+            updateRemainingTime();
+            const timerId = setInterval(updateRemainingTime, 1000);
+    
+            setTimer(timerId);
+          }
+        }
+      };
+    
+      checkTimer();
+    
+      return () => {
+        if (timer) {
+          clearInterval(timer);
+        }
+      };
+    }, []); 
+
+    const formatTimeRemaining = (timeInMilliseconds) => {
+      const totalSeconds = Math.floor(timeInMilliseconds / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+    
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
   
     const handlePress = () => {
       const location = Object.values(currentRoundData)[photoIndex];
@@ -119,7 +181,15 @@ export default function Game() {
         <Modal visible={endRoundModal}>
               <View style={styles.modal}>
                 <Text style={styles.modalText}>Round 1 Completed, you got {roundScore}/5</Text>
-                <Button title="NEXT ROUND" onPress={() => {setEndRoundModal(false);   setShowModal(false), setCurrentRound(currentRound + 1); setPhotoIndex(0); setRoundScore(0) }} />
+                <Button title="NEXT ROUND" onPress={nextRound} disabled={timeRemaining > 0}/>
+                <View>
+               {timeRemaining !== null && (
+              <Text style={styles.textTimer}>{formatTimeRemaining(timeRemaining)}</Text>
+              )}
+               </View>
+               <Pressable style={styles.buttonRestart} onPress={resetGame}>
+         <Text style={styles.text}>R</Text>
+        </Pressable>
               </View>
         </Modal>
         <Pressable style={styles.buttonRestart} onPress={resetGame}>
@@ -182,6 +252,11 @@ export default function Game() {
   },
   text: {
     fontFamily: 'monospace'
+  },
+  textTimer: {
+    fontFamily: 'monospace',
+    padding: 20,
+    fontSize: 20
   },
   buttonRestart: {
 
