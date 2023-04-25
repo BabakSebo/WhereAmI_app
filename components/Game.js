@@ -22,6 +22,8 @@ export default function Game() {
       return roundsData[currentRound] || {}; // return the data for the current round or an empty object if the round data is not available
     }
 
+    const timerDuation = 200*1000;
+
     const resetGame = () => {
       setInput("");
       setShowModal(false);
@@ -35,9 +37,34 @@ export default function Game() {
       setCurrentRound(1);
       setTimer(null);
       setTimeRemaining(null);
+      startTimer(200);
     }
 
     const currentRoundData = getCurrentRoundData();
+
+    const startTimer = async (durationInSeconds) => {
+      // Calculate the end time
+  const endTime = new Date().getTime() + durationInSeconds * 1000;
+  
+      // Save the end time in AsyncStorage
+  await AsyncStorage.setItem('timerEndTime', endTime.toString());
+  
+      // Update the timer
+   const updateRemainingTime = () => {
+        const currentTime = new Date().getTime();
+        setTimeRemaining(Math.max(0, endTime - currentTime));
+      };
+  
+      updateRemainingTime();
+      const timerId = setInterval(updateRemainingTime, 1000);
+  
+      // Clear the previous timer if it exists
+      if (timer) {
+        clearInterval(timer);
+      }
+  
+      setTimer(timerId);
+    };
 
     const nextRound = async () => {
       setEndRoundModal(false);
@@ -45,15 +72,17 @@ export default function Game() {
       setRoundScore(0);
       setPhotoIndex(0);
       setCurrentRound(currentRound + 1);
-    
+      startTimer(200);
+   
       // Calculate the end time
-      const endTime = new Date().getTime() + 3 * 60 * 60 * 1000;
+      const endTime = new Date().getTime() + timerDuration;
     
       // Save the end time in AsyncStorage
       await AsyncStorage.setItem('timerEndTime', endTime.toString());
     };
 
     useEffect(() => {
+      resetGame();
       const checkTimer = async () => {
         const endTimeString = await AsyncStorage.getItem('timerEndTime');
         if (endTimeString) {
